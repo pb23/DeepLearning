@@ -106,6 +106,6 @@ def train_model(epochs):
 
 
 if __name__ == '__main__':
-	train_model(5)
+	train_model(25)
 
 
