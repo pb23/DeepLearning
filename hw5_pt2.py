@@ -17,14 +17,6 @@ import os
 import sys
 import torchvision.models as models
 
-
-#load training and testing datasets
-train = torchvision.datasets.CIFAR100(root='./data',train=True,download=True,transform=transforms)
-trainset = torch.utils.data.DataLoader(train,batch_size=128,shuffle=True)
-
-test = torchvision.datasets.CIFAR100(root='./data',train=False,download=True,transform=transforms)
-testset = torch.utils.data.DataLoader(test,batch_size=128,shuffle=False)
-
 #upsampling for CIFAR100 - previously ImageNet dimensions
 DIM = 224
 
@@ -46,6 +38,15 @@ transform_test = transforms.Compose([
     transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]), 
 ])
 
+#load training and testing datasets
+train = torchvision.datasets.CIFAR100(root='./data',train=True,download=True,transform=transform_train)
+trainset = torch.utils.data.DataLoader(train,batch_size=128,shuffle=True)
+
+test = torchvision.datasets.CIFAR100(root='./data',train=False,download=True,transform=transform_test)
+testset = torch.utils.data.DataLoader(test,batch_size=128,shuffle=False)
+
+
+
 #previously model has output size of 1000 (classifications for ImageNet)
 model = models.resnet18(pretrained=True)
 model.fc = nn.Linear(512,100)
@@ -61,32 +62,37 @@ def train_model(epochs):
 
 	for epoch in range(epochs):
 
-		epoch_acc = 0
+		epoch_acc = 0x
 		epoch_loss = 0.0
 		epoch_counter = 0
 
 		for i,batch in enumerate(trainset,0):
 
 			data , actual = batch
-			#data = Variable(data)#.cuda()
-			#actual = Variable(actual)#.cuda()
+			data = Variable(data)#.cuda()
+			actual = Variable(actual)#.cuda()
 
 			with torch.no_grad():
-				h = model.conv1(x)
+				h = model.conv1(data)
 				h = model.bn1(h)
+				h = model.relu(h)
+				h = model.maxpool(h)
 				h = model.layer1(h)
 				h = model.layer2(h)
 				h = model.layer3(h)
 			h = model.layer4(h)
 			h = model.avgpool(h)
 			h = h.view(h.size(0), -1)
-
 			output = model.fc(h)
+
+			
+			loss = costFunction(output,actual)
 			prediction = output.data.max(1)[1]
 			epoch_acc += float(prediction.eq(actual.data).sum())
 			epoch_counter += 128
 
-			loss = costFunction(prediction,actual)
+			#print(prediction.size())
+			#print(actual.size())
 			epoch_loss += loss.item() 
 
 			optimizer.zero_grad()
