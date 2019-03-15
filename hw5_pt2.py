@@ -50,6 +50,7 @@ testset = torch.utils.data.DataLoader(test,batch_size=128,shuffle=False)
 #previously model has output size of 1000 (classifications for ImageNet)
 model = models.resnet18(pretrained=True)
 model.fc = nn.Linear(512,100)
+model = model.cuda()
 
 acc = 0  #Store best accuracy
 epoch = 0 #store epochs
@@ -69,8 +70,8 @@ def train_model(epochs):
 		for i,batch in enumerate(trainset,0):
 
 			data , actual = batch
-			data = Variable(data)#.cuda()
-			actual = Variable(actual)#.cuda()
+			data = Variable(data).cuda()
+			actual = Variable(actual).cuda()
 
 			with torch.no_grad():
 				h = model.conv1(data)
@@ -106,6 +107,6 @@ def train_model(epochs):
 
 
 if __name__ == '__main__':
-	train_model(25)
+	train_model(25. )
 
 
