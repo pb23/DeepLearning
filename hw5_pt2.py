@@ -63,7 +63,7 @@ def train_model(epochs):
 
 	for epoch in range(epochs):
 
-		epoch_acc = 0x
+		epoch_acc = 0
 		epoch_loss = 0.0
 		epoch_counter = 0
 
@@ -81,10 +81,10 @@ def train_model(epochs):
 				h = model.layer1(h)
 				h = model.layer2(h)
 				h = model.layer3(h)
-			h = model.layer4(h)
-			h = model.avgpool(h)
-			h = h.view(h.size(0), -1)
-			output = model.fc(h)
+				h = model.layer4(h)
+				h = model.avgpool(h)
+				h = h.view(h.size(0), -1)
+				output = model.fc(h)
 
 			
 			loss = costFunction(output,actual)
